@@ -162,6 +162,7 @@ def minimax(board):
     #     print(f"First_player: {first_player}")
     #     print()
     # return((0,0))
+    
 
 
 """
@@ -190,8 +191,11 @@ def move_value(board):
     #     return 0
 
     score = utility(board)
-    return score
-
+    if winner(board):
+        return score
+        
+    elif terminal(board):
+        return 0
     if player(board) is X:
         best = -100
         for move in actions(board):
@@ -204,4 +208,6 @@ def move_value(board):
             result_board = result(board, move)
             best = min(best, move_value(result_board))
         return best
+
+    
     
