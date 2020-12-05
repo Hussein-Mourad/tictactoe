@@ -66,7 +66,7 @@ def result(board, action):
         new_board[action[0]][action[1]] = player(new_board)
 
         return new_board
-    
+
 
 def winner(board):
     """
@@ -125,41 +125,50 @@ def minimax(board):
         best_value = float("-inf")
         for action in actions(board):
             result_board = result(board, action)
-            current_value = min_board_value(result_board)
+            current_value = min_board_value(result_board, alpha, beta)
             if current_value > best_value:
                 best_value = current_value
                 best_move = action
     else:
         best_value = float("inf")
         for action in actions(board):
-            result_board = result(board,action)
-            current_value = max_board_value(result_board)
+            result_board = result(board, action)
+            current_value = max_board_value(result_board, alpha, beta)
             if current_value < best_value:
                 best_value = current_value
                 best_move = action
     return best_move
-    
-    
-def max_board_value(board):
-    
+
+
+def max_board_value(board, alpha, beta):
+
     if terminal(board):
         return utility(board)
 
     best_value = float("-inf")
     for action in actions(board):
         result_board = result(board, action)
-        best_value = max(best_value, min_board_value(result_board))
-    
+        best_value = max(best_value, min_board_value(
+            result_board, alpha, beta))
+        alpha = max(alpha, best_value)
+        if beta <= alpha:
+            break
+
     return best_value
 
 
-def min_board_value(board):
+def min_board_value(board, alpha, beta):
     if terminal(board):
         return utility(board)
 
     best_value = float("inf")
     for action in actions(board):
         result_board = result(board, action)
-        best_value = min(best_value, max_board_value(result_board))
-    
+        best_value = min(best_value, max_board_value(
+            result_board, alpha, beta))
+        beta = min(alpha,best_value)
+        if beta <= alpha:
+            break
+
+
     return best_value
