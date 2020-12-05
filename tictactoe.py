@@ -36,8 +36,7 @@ def player(board):
                 total_moves += 1
                 num_O += 1
 
-    print(
-        f"Total Moves: {total_moves}\t Number of X: {num_X}\t Number of O: {num_O}")
+    # print(f"Total Moves: {total_moves} Number X:{num_X} Number O:{num_O}")
 
     if total_moves == 1 and num_X == 1:
         first_player = X
@@ -55,6 +54,8 @@ def player(board):
         return O
     elif terminal(board):
         return None
+    else:
+        return X
 
     # # if number of X equals O then its X's turn assuming that X always starts
     # if num_X == num_O:
@@ -101,7 +102,7 @@ def winner(board):
             return board[i][0]
 
         elif board[0][i] == board[1][i] == board[2][i]:
-            return board[i][0]
+            return board[0][i]
 
     # Checks for diagonals
     if board[0][0] == board[1][1] == board[2][2]:
@@ -141,25 +142,26 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
+
+    best_value = -100
+    best_move = None
+    for move in actions(board):
+        value = move_value(board, 0)
+        if value > best_value:
+            best_move = move
+    print(f"Move:{best_move}")
+    return best_move
+
     if terminal(board):
         return None
-
-    # best_value = -100
-    # best_move = None
     # for move in actions(board):
-    #     value = move_value(board, 0)
-    #     if value > best_value:
-    #         best_move = move
-    # print(f"Move:{best_move}")
-    # return best_move
-
-    for move in actions(board):
-        result_board = result(board, move)
-        for i in range(3):
-            print(board[i])
-        print(f"Player's turn: {player(board)}")
-        print(f"First_player: {first_player}")
-        print()
+    #     result_board = result(board, move)
+    #     for i in range(3):
+    #         print(result_board[i])
+    #     print(f"Player's turn: {player(result_board)}")
+    #     print(f"First_player: {first_player}")
+    #     print()
+    # return((0,0))
 
 
 """
@@ -174,27 +176,27 @@ if player is O:
     choose the move with lowest score"""
 
 
-# def move_value(board, depth):
+def move_value(board, depth):
 
-#     score = utility(board)
-#     if score == 1:
-#         return score
-#     elif score == -1:
-#         return score
-#     elif terminal(board):
-#         return 0
+    score = utility(board)
+    if score == 1:
+        return score
+    elif score == -1:
+        return score
+    elif terminal(board):
+        return 0
 
-#     # return utility(board)
+    # return utility(board)
 
-#     if player(board) is X:
-#         best = -100
-#         for move in actions(board):
-#             result_board = result(board, move)
-#             best = max(best, move_value(result_board, depth + 1))
-#         return best
-#     else:
-#         best = 100
-#         for move in actions(board):
-#             result_board = result(board, move)
-#             best = min(best, move_value(result_board, depth + 1))
-#         return best
+    if player(board) is X:
+        best = -100
+        for move in actions(board):
+            result_board = result(board, move)
+            best = max(best, move_value(result_board, depth + 1))
+        return best
+    else:
+        best = 100
+        for move in actions(board):
+            result_board = result(board, move)
+            best = min(best, move_value(result_board, depth + 1))
+        return best
