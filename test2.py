@@ -12,6 +12,7 @@ board[2][1] = O
 board[2][2] = X
 for i in range(3):
     print(board[i])
-minimax(board)
+
 for i in range(3):
-    print(board[i])
+    if None in board[i]:
+        print(True)

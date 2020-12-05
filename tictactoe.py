@@ -73,8 +73,10 @@ def actions(board):
         for j, col in enumerate(row):
             if col is EMPTY:
                 available.add((i, j))
+
     if terminal(board):
-        return None
+        return 0
+
     return available
 
 
@@ -82,8 +84,10 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    if terminal(board):
-        return None
+    # Check if the action is validG
+    if action[0] > 2 or action[1] > 2:
+        raise ValueError
+
     # Making a deepcopy of the board
     new_board = board[:]
     if action is not None:
@@ -119,11 +123,10 @@ def terminal(board):
     if winner(board):
         return True
     else:
-        for row in board:
-            for item in row:
-                if item is EMPTY:
-                    return False
-
+        for i in range(3):
+            if not None in board[i]:
+                return True
+    return False
 
 def utility(board):
     """
@@ -134,7 +137,7 @@ def utility(board):
         return 1
     elif w is O:
         return -1
-    elif w is None:
+    elif terminal(board):
         return 0
 
 
@@ -142,26 +145,15 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    
-    best_value = -100
-    best_move = None
-    for move in actions(board):
-        value = move_value(board)
-        if value > best_value:
-            best_move = move
-    print(f"Move:{best_move}")
-    return best_move
-
     if terminal(board):
         return None
-    # for move in actions(board):
-    #     result_board = result(board, move)
-    #     for i in range(3):
-    #         print(result_board[i])
-    #     print(f"Player's turn: {player(result_board)}")
-    #     print(f"First_player: {first_player}")
-    #     print()
-    # return((0,0))
+    
+
+    # for i in range(3):
+    #     print(result_board[i])
+    # print(f"Player's turn: {player(result_board)}")
+    # print(f"First_player: {first_player}")
+    # print()
     
 
 
@@ -176,38 +168,36 @@ if player is O:
         calculate score for the board
     choose the move with lowest score"""
 
+def move_value(board, depth):
 
-def move_value(board):
-    for i in range(3):
-        print(board[i])
-    print()
-
-    # score = utility(board)
-    # if score == 1:
-    #     return score
-    # elif score == -1:
-    #     return score
-    # elif terminal(board):
-    #     return 0
-
-    score = utility(board)
     if winner(board):
-        return score
-        
+        return utility(board)
+    elif not winner(board):
+        return utility(board)
     elif terminal(board):
-        return 0
-    if player(board) is X:
-        best = -100
-        for move in actions(board):
-            result_board = result(board, move)
-            best = max(best, move_value(result_board))
-        return best
-    else:
-        best = 100
-        for move in actions(board):
-            result_board = result(board, move)
-            best = min(best, move_value(result_board))
-        return best
+        return None
 
-    
-    
+    if player(board) is X:
+        best = [(None, None), float("-inf")]
+    else:
+        best = [(None, None), float("inf")]
+
+    if player(board) is X:
+        for move in actions(board):
+            result_board = result(board, move)
+            score = utility(board)
+            if score > best[1]:
+                best = [move, score]
+            for i in range(3):
+                print(result_board[i])
+            print(best, end="\n\n")
+
+    else:
+        for move in actions(board):
+            result_board = result(board, move)
+            score = utility(board)
+            if score < best[1]:
+                best = [move, score]
+            for i in range(3):
+                print(result_board[i])
+            print(best, end="\n\n")
