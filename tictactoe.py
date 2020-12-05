@@ -142,11 +142,11 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-
+    
     best_value = -100
     best_move = None
     for move in actions(board):
-        value = move_value(board, 0)
+        value = move_value(board)
         if value > best_value:
             best_move = move
     print(f"Move:{best_move}")
@@ -176,27 +176,32 @@ if player is O:
     choose the move with lowest score"""
 
 
-def move_value(board, depth):
+def move_value(board):
+    for i in range(3):
+        print(board[i])
+    print()
+
+    # score = utility(board)
+    # if score == 1:
+    #     return score
+    # elif score == -1:
+    #     return score
+    # elif terminal(board):
+    #     return 0
 
     score = utility(board)
-    if score == 1:
-        return score
-    elif score == -1:
-        return score
-    elif terminal(board):
-        return 0
-
-    # return utility(board)
+    return score
 
     if player(board) is X:
         best = -100
         for move in actions(board):
             result_board = result(board, move)
-            best = max(best, move_value(result_board, depth + 1))
+            best = max(best, move_value(result_board))
         return best
     else:
         best = 100
         for move in actions(board):
             result_board = result(board, move)
-            best = min(best, move_value(result_board, depth + 1))
+            best = min(best, move_value(result_board))
         return best
+    
