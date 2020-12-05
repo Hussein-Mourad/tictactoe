@@ -1,342 +1,168 @@
-# from tictactoe import *
+import math
+import copy
 
-# board = initial_state()
-
-# board[0][0] = X
-# board[0][1] = O
-# board[0][2] = X
-# board[1][0] = O
-# board[1][1] = X
-# board[1][2] = O
-# board[2][0] = X
-# board[2][1] = O
-# board[2][2] = X
-
-# for i in range(3):
-#     print(board[i])
-# print(f"Player's turn: {player(board)}")
-# print(f"First_player: {first_player}")
+X = "X"
+O = "O"
+EMPTY = None
 
 
-#!/usr/bin/env python3
-from math import inf as infinity
-from random import choice
-import platform
-import time
-from os import system
-
-"""
-An implementation of Minimax AI Algorithm in Tic Tac Toe,
-using Python.
-This software is available under GPL license.
-Author: Clederson Cruz
-Year: 2017
-License: GNU GENERAL PUBLIC LICENSE (GPL)
-"""
-
-HUMAN = -1
-COMP = +1
-board = [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-]
-
-
-def evaluate(state):
+def initial_state():
     """
-    Function to heuristic evaluation of state.
-    :param state: the state of the current board
-    :return: +1 if the computer wins; -1 if the human wins; 0 draw
+    Returns starting state of the board.
     """
-    if wins(state, COMP):
-        score = +1
-    elif wins(state, HUMAN):
-        score = -1
+    return [[EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]]
+
+
+def player(board):
+    """
+    Returns player who has the next turn on a board.
+    """
+    if board == initial_state():
+        return X
+
+    xcounter = 0
+    ocounter = 0
+    for row in board:
+        xcounter += row.count(X)
+        ocounter += row.count(O)
+
+    if xcounter == ocounter:
+        return X
     else:
-        score = 0
-
-    return score
+        return O
 
 
-def wins(state, player):
+def actions(board):
     """
-    This function tests if a specific player wins. Possibilities:
-    * Three rows    [X X X] or [O O O]
-    * Three cols    [X X X] or [O O O]
-    * Two diagonals [X X X] or [O O O]
-    :param state: the state of the current board
-    :param player: a human or a computer
-    :return: True if the player wins
+    Returns set of all possible actions (i, j) available on the board.
     """
-    win_state = [
-        [state[0][0], state[0][1], state[0][2]],
-        [state[1][0], state[1][1], state[1][2]],
-        [state[2][0], state[2][1], state[2][2]],
-        [state[0][0], state[1][0], state[2][0]],
-        [state[0][1], state[1][1], state[2][1]],
-        [state[0][2], state[1][2], state[2][2]],
-        [state[0][0], state[1][1], state[2][2]],
-        [state[2][0], state[1][1], state[0][2]],
-    ]
-    if [player, player, player] in win_state:
-        return True
-    else:
-        return False
+    possible_moves = []
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == EMPTY:
+                possible_moves.append([i, j])
+    return possible_moves
 
 
-def game_over(state):
+def result(board, action):
     """
-    This function test if the human or computer wins
-    :param state: the state of the current board
-    :return: True if the human or computer wins
+    Returns the board that results from making move (i, j) on the board.
     """
-    return wins(state, HUMAN) or wins(state, COMP)
-
-
-def empty_cells(state):
-    """
-    Each empty cell will be added into cells' list
-    :param state: the state of the current board
-    :return: a list of empty cells
-    """
-    cells = []
-
-    for x, row in enumerate(state):
-        for y, cell in enumerate(row):
-            if cell == 0:
-                cells.append([x, y])
-
-    return cells
-
-
-def valid_move(x, y):
-    """
-    A move is valid if the chosen cell is empty
-    :param x: X coordinate
-    :param y: Y coordinate
-    :return: True if the board[x][y] is empty
-    """
-    if [x, y] in empty_cells(board):
-        return True
-    else:
-        return False
-
-
-def set_move(x, y, player):
-    """
-    Set the move on board, if the coordinates are valid
-    :param x: X coordinate
-    :param y: Y coordinate
-    :param player: the current player
-    """
-    if valid_move(x, y):
-        board[x][y] = player
-        return True
-    else:
-        return False
-
-
-def minimax(state, depth, player):
-    """
-    AI function that choice the best move
-    :param state: current state of the board
-    :param depth: node index in the tree (0 <= depth <= 9),
-    but never nine in this case (see iaturn() function)
-    :param player: an human or a computer
-    :return: a list with [the best row, best col, best score]
-    """
-    if player == COMP:
-        best = [-1, -1, -infinity]
-    else:
-        best = [-1, -1, +infinity]
-
-    if depth == 0 or game_over(state):
-        score = evaluate(state)
-        return [-1, -1, score]
-
-    for cell in empty_cells(state):
-        x, y = cell[0], cell[1]
-        state[x][y] = player
-        score = minimax(state, depth - 1, -player)
-        state[x][y] = 0
-        score[0], score[1] = x, y
-
-        if player == COMP:
-            if score[2] > best[2]:
-                best = score  # max value
+    boardcopy = copy.deepcopy(board)
+    try:
+        if boardcopy[action[0]][action[1]] != EMPTY:
+            raise IndexError
         else:
-            if score[2] < best[2]:
-                best = score  # min value
+            boardcopy[action[0]][action[1]] = player(boardcopy)
+            return boardcopy
+    except IndexError:
+        print('Spot already occupied')
 
-    return best
 
-
-def clean():
+def winner(board):
     """
-    Clears the console
+    Returns the winner of the game, if there is one.
     """
-    os_name = platform.system().lower()
-    if 'windows' in os_name:
-        system('cls')
+    columns = []
+    # Checks rows
+    for row in board:
+        xcounter = row.count(X)
+        ocounter = row.count(O)
+        if xcounter == 3:
+            return X
+        if ocounter == 3:
+            return O
+
+    # Checks columns
+    for j in range(len(board)):
+        column = [row[j] for row in board]
+        columns.append(column)
+
+    for j in columns:
+        xcounter = j.count(X)
+        ocounter = j.count(O)
+        if xcounter == 3:
+            return X
+        if ocounter == 3:
+            return O
+
+    # Checks diagonals
+    if board[0][0] == O and board[1][1] == O and board[2][2] == O:
+        return O
+    if board[0][0] == X and board[1][1] == X and board[2][2] == X:
+        return X
+    if board[0][2] == O and board[1][1] == O and board[2][0] == O:
+        return O
+    if board[0][2] == X and board[1][1] == X and board[2][0] == X:
+        return X
+
+    # No winner/tie
+    return None
+
+
+def terminal(board):
+    """
+    Returns True if game is over, False otherwise.
+    """
+    # Checks if board is full or if there is a winner
+    empty_counter = 0
+    for row in board:
+        empty_counter += row.count(EMPTY)
+    if empty_counter == 0:
+        return True
+    elif winner(board) is not None:
+        return True
     else:
-        system('clear')
+        return False
 
 
-def render(state, c_choice, h_choice):
+def utility(board):
     """
-    Print the board on console
-    :param state: current state of the board
+    Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-
-    chars = {
-        -1: h_choice,
-        +1: c_choice,
-        0: ' '
-    }
-    str_line = '---------------'
-
-    print('\n' + str_line)
-    for row in state:
-        for cell in row:
-            symbol = chars[cell]
-            print(f'| {symbol} |', end='')
-        print('\n' + str_line)
-
-
-def ai_turn(c_choice, h_choice):
-    """
-    It calls the minimax function if the depth < 9,
-    else it choices a random coordinate.
-    :param c_choice: computer's choice X or O
-    :param h_choice: human's choice X or O
-    :return:
-    """
-    depth = len(empty_cells(board))
-    if depth == 0 or game_over(board):
-        return
-
-    clean()
-    print(f'Computer turn [{c_choice}]')
-    render(board, c_choice, h_choice)
-
-    if depth == 9:
-        x = choice([0, 1, 2])
-        y = choice([0, 1, 2])
+    if winner(board) == X:
+        return 1
+    elif winner(board) == O:
+        return -1
     else:
-        move = minimax(board, depth, COMP)
-        x, y = move[0], move[1]
-
-    set_move(x, y, COMP)
-    time.sleep(1)
+        return 0
 
 
-def human_turn(c_choice, h_choice):
-    """
-    The Human plays choosing a valid move.
-    :param c_choice: computer's choice X or O
-    :param h_choice: human's choice X or O
-    :return:
-    """
-    depth = len(empty_cells(board))
-    if depth == 0 or game_over(board):
-        return
-
-    # Dictionary of valid moves
-    move = -1
-    moves = {
-        1: [0, 0], 2: [0, 1], 3: [0, 2],
-        4: [1, 0], 5: [1, 1], 6: [1, 2],
-        7: [2, 0], 8: [2, 1], 9: [2, 2],
-    }
-
-    clean()
-    print(f'Human turn [{h_choice}]')
-    render(board, c_choice, h_choice)
-
-    while move < 1 or move > 9:
-        try:
-            move = int(input('Use numpad (1..9): '))
-            coord = moves[move]
-            can_move = set_move(coord[0], coord[1], HUMAN)
-
-            if not can_move:
-                print('Bad move')
-                move = -1
-        except (EOFError, KeyboardInterrupt):
-            print('Bye')
-            exit()
-        except (KeyError, ValueError):
-            print('Bad choice')
-
-
-def main():
-    """
-    Main function that calls all functions
-    """
-    clean()
-    h_choice = ''  # X or O
-    c_choice = ''  # X or O
-    first = ''  # if human is the first
-
-    # Human chooses X or O to play
-    while h_choice != 'O' and h_choice != 'X':
-        try:
-            print('')
-            h_choice = input('Choose X or O\nChosen: ').upper()
-        except (EOFError, KeyboardInterrupt):
-            print('Bye')
-            exit()
-        except (KeyError, ValueError):
-            print('Bad choice')
-
-    # Setting computer's choice
-    if h_choice == 'X':
-        c_choice = 'O'
+def minimax(board):
+    current_player = player(board)
+    best_move = None
+    if current_player == X:
+        v = -math.inf
+        for action in actions(board):
+            k = min_value(result(board, action))  # FIXED
+            if k > v:
+                v = k
+                best_move = action
     else:
-        c_choice = 'X'
-
-    # Human may starts first
-    clean()
-    while first != 'Y' and first != 'N':
-        try:
-            first = input('First to start?[y/n]: ').upper()
-        except (EOFError, KeyboardInterrupt):
-            print('Bye')
-            exit()
-        except (KeyError, ValueError):
-            print('Bad choice')
-
-    # Main loop of this game
-    while len(empty_cells(board)) > 0 and not game_over(board):
-        if first == 'N':
-            ai_turn(c_choice, h_choice)
-            first = ''
-
-        human_turn(c_choice, h_choice)
-        ai_turn(c_choice, h_choice)
-
-    # Game over message
-    if wins(board, HUMAN):
-        clean()
-        print(f'Human turn [{h_choice}]')
-        render(board, c_choice, h_choice)
-        print('YOU WIN!')
-    elif wins(board, COMP):
-        clean()
-        print(f'Computer turn [{c_choice}]')
-        render(board, c_choice, h_choice)
-        print('YOU LOSE!')
-    else:
-        clean()
-        render(board, c_choice, h_choice)
-        print('DRAW!')
-
-    exit()
+        v = math.inf
+        for action in actions(board):
+            k = max_value(result(board, action))  # FIXED
+            if k < v:
+                v = k
+                best_move = action
+    return best_move
 
 
-if __name__ == '__main__':
-    main()
+def max_value(board):
+    if terminal(board):
+        return utility(board)
+    v = -math.inf
+    for action in actions(board):
+        v = max(v, min_value(result(board, action)))
+    return v  # FIXED
 
 
-
+def min_value(board):
+    if terminal(board):
+        return utility(board)
+    v = math.inf
+    for action in actions(board):
+        v = min(v, max_value(result(board, action)))
+    return v  # FIXED
